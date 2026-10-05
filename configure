@@ -1,0 +1,133 @@
+#!/bin/sh
+
+# Initialize flag state trackers
+DEBUG_MODE="no"
+
+# Pure POSIX argument parser loop
+for arg in "$@"; do
+    case "$arg" in
+        -debug|--debug)
+            DEBUG_MODE="yes"
+            ;;
+        *)
+            echo "[WARNING] Unknown configuration parameter: $arg" >&2
+            ;;
+    esac
+done
+
+CC="cc"
+printf "checking for cc... "
+if command -v cc >/dev/null 2>&1; then
+    echo "yes"
+else
+    echo "no"
+    echo "[ERROR] System compiler 'cc' not found." >&2
+    exit 1
+fi
+
+# Hardened validation tracking check for the system linker tool
+LD="ld"
+printf "checking for ld... "
+if command -v ld >/dev/null 2>&1; then
+    echo "yes"
+else
+    echo "no"
+    echo "[ERROR] linker 'ld' not found." >&2
+    exit 1
+fi
+
+# Set optimized build definitions
+if [ "$DEBUG_MODE" = "yes" ]; then
+    printf "configure: configuring build for DEBUGGING... \n"
+    CFLAGS="-Wall -Wextra -g -O0 -Iinclude"
+else
+    CFLAGS="-Wall -Wextra -Iinclude"
+fi
+
+LIBS=""
+
+# 3. Pure POSIX Source & Object Expansion Logic
+SRCS=""
+OBJS=""
+
+for f in src/*.c; do
+    if [ -f "$f" ]; then
+        if [ -z "$SRCS" ]; then
+            SRCS="$f"
+        else
+            SRCS="$SRCS $f"
+        fi
+        bare_obj=$(echo "$f" | sed 's|^src/||' | sed 's|\.c$|\.o|')
+        if [ -z "$OBJS" ]; then
+            OBJS="$bare_obj"
+        else
+            OBJS="$OBJS $bare_obj"
+        fi
+    fi
+done
+
+# Instantiate a true POSIX Tab variable to guarantee rule separators
+T=$(printf '\t')
+
+# 4. Output the completed local build rules Makefile
+printf "configure: creating Makefile... "
+cat << EOF > Makefile
+CC = $CC
+LD = $LD
+CFLAGS = $CFLAGS
+LIBS = $LIBS
+TARGET = paxutils
+
+SRCS = $SRCS
+OBJS = $OBJS
+
+# Standard Unix installation pathway flags
+PREFIX ?= /usr/local
+BINDIR = \$(PREFIX)/bin
+MANDIR = \$(PREFIX)/share/man/man1
+
+all: \$(TARGET)
+
+\$(TARGET): \$(OBJS)
+${T}\$(CC) \$(CFLAGS) \$(OBJS) -o \$(TARGET) \$(LIBS)
+EOF
+
+# 5. Dynamically loop over your src/ folder to auto-generate object compilation blocks
+for src_file in src/*.c; do
+    if [ -f "$src_file" ]; then
+        bare_name=$(echo "$src_file" | sed 's|^src/||' | sed 's|\.c$||')
+        cat << EOF >> Makefile
+
+${bare_name}.o: src/${bare_name}.c
+${T}\$(CC) \$(CFLAGS) -c src/${bare_name}.c -o ${bare_name}.o
+EOF
+    fi
+done
+
+# 6. Append deployment pipeline targets and clean routines
+cat << EOF >> Makefile
+
+install: \$(TARGET)
+${T}mkdir -p \$(DESTDIR)\$(BINDIR)
+${T}mkdir -p \$(DESTDIR)\$(MANDIR)
+${T}cp -f \$(TARGET) \$(DESTDIR)\$(BINDIR)/
+${T}chmod 755 \$(DESTDIR)\$(BINDIR)/\$(TARGET)
+${T}cp -f paxutils.1 \$(DESTDIR)\$(MANDIR)/
+${T}chmod 644 \$(DESTDIR)\$(MANDIR)/paxutils.1
+${T}@echo "Paxutils core suite framework installed successfully."
+
+uninstall:
+${T}rm -f \$(DESTDIR)\$(BINDIR)/\$(TARGET)
+${T}rm -f \$(DESTDIR)\$(MANDIR)/paxutils.1
+${T}@echo "Paxutils components removed from system paths."
+
+clean:
+${T}rm -f \$(OBJS) \$(TARGET)
+
+distclean: clean
+${T}rm -f Makefile
+
+.PHONY: all clean distclean install uninstall
+EOF
+
+echo "done"

@@ -1,0 +1,183 @@
+.TH PAXUTILS 1 "paxutils" "paxutils General Commands Manual"
+.SH NAME
+paxutils \- unified core utilities multi-call binary
+.SH SYNOPSIS
+.B paxutils
+.I command
+[...]
+.br
+.B cat
+[\fIFILE\fR...]
+.br
+.B chmod
+.I OCTAL_MODE FILE...
+.br
+.B chown
+.I USER[:GROUP] FILE...
+.br
+.B clear
+.br
+.B cp
+[\fB\-r\fR] [\fB\-f\fR]
+.I SOURCE DEST
+.br
+.B echo
+[\fB\-n\fR]
+[\fISTRING\fR...]
+.br
+.B env
+[\fB\-i\fR] [\fINAME=VALUE\fR...] [\fICOMMAND\fR [\fIARG\fR...]]
+.br
+.B grep
+.I PATTERN
+[\fIFILE\fR...]
+.br
+.B head
+[\fB\-n\fR \fILINES\fR]
+[\fIFILE\fR...]
+.br
+.B kill
+[\fB\-\fR\fISIGNAL\fR] \fIPID\fR...
+.br
+.B less
+[\fB\-\fR] [\fIFILE\fR]
+.br
+.B ln
+[\fB\-s\fR] [\fB\-f\fR]
+.I TARGET LINK_NAME
+.br
+.B ls
+[\fB\-a\fR] [\fB\-l\fR]
+[\fIFILE\fR...]
+.br
+.B mkdir
+[\fB\-p\fR | \fB\-P\fR | \fB\-\-panic\fR]
+.I DIRECTORY...
+.br
+.B mv
+.I SOURCE DEST
+.br
+.B ps
+.br
+.B pwd
+.br
+.B rm
+[\fB\-r\fR] [\fB\-f\fR]
+.I FILE...
+.br
+.B rmdir
+.I DIRECTORY...
+.br
+.B sleep
+[\fB\-w\fR]
+[\fISECONDS\fR]
+.br
+.B tail
+[\fB\-n\fR \fILINES\fR]
+[\fIFILE\fR...]
+.br
+.B tee
+[\fB\-a\fR] [\fIFILE\fR...]
+.br
+.B touch
+\fIFILE\fR...
+.br
+.B truncate
+.B \-s
+.I SIZE FILE...
+.br
+.B uname
+[\fB\-a\fR] [\fB\-s\fR] [\fB\-n\fR] [\fB\-r\fR] [\fB\-v\fR] [\fB\-m\fR]
+.br
+.B yes
+[\fISTRING\fR]
+.SH DESCRIPTION
+.B paxutils
+is a single-binary core utility collection. It implements essential userland POSIX commands.
+
+.SH COMMANDS
+.TP
+.B cat
+Concatenate FILE(s) or standard input to standard output.
+.TP
+.B chmod
+Change file permissions utilizing a base-8 octal mode string parser loop. Fail early if malformed.
+.TP
+.B chown
+Change file owner and group via user database lookups without heap allocation.
+.TP
+.B clear
+Clear the terminal screen and scrollback buffer using raw ANSI escape codes.
+.TP
+.B cp
+Copy files or directories (supports recursive copy with \-r and force unlinking with \-f).
+.TP
+.B echo
+Print text to standard output.
+.TP
+.B env
+Display active environmental variables, or run a binary within a modified environment footprint. Supports \-i to wipe the environmental vector space entirely.
+.TP
+.B grep
+Pax Regular Expression Printer. A clean, allocation-free text filtering stream scanner that matches tracking strings line-by-line via optimized sub-pointer arrays.
+.TP
+.B head
+Output the first part of files (default 10 lines).
+.TP
+.B kill
+Send operating system scheduling signals (e.g., \-9 / \-KILL) straight to target PIDs via kernel routines.
+.TP
+.B less
+Smart ANSI-aware terminal pager. Auto-wraps long text chunks to match 85-column parameters, tracks printable string widths, and passes raw color arrays dynamically to Alacritty.
+.TP
+.B ln
+Make links between files (supports \-s for symbolic links and \-f to overwrite existing links).
+.TP
+.B ls
+List directory contents with automatic color highlighting for directories and executables.
+.TP
+.B mkdir
+Create directories. Supports standard POSIX recursive parent path mapping via \-p. Passing \-P or \-\-panic triggers Panic Mode, causing an early system error if a collision triggers.
+.TP
+.B mv
+Move or rename files and directories.
+.TP
+.B ps
+Process snapshot utility. Parses live system task attributes dynamically from the virtual /proc filesystem registers using flat stack frames.
+.TP
+.B pwd
+Print name of current/working directory.
+.TP
+.B rm
+Remove files or directories. Armed with an explicit root preservation layout script that captures and blocks system-wiping attempts with a definitive "No." message.
+.TP
+.B rmdir
+Remove empty directories.
+.TP
+.B sleep
+Pause execution for a specified number of seconds. Hybrid Feature: Passing \-w triggers DOS-style keypress pause mode ("Press any key to continue . . .").
+.TP
+.B tail
+Output the last part of files (default 10 lines).
+.TP
+.B tee
+High-throughput data stream T-splitter pipe. Duplicates standard input, flushing blocks down to stdout and disk files simultaneously via static 4KB stream chunk arrays.
+.TP
+.B touch
+Initialize empty file sandboxes, or update filesystem node modification timestamps atomically.
+.TP
+.B truncate
+Shrink or extend the size of each FILE to the specified size.
+.TP
+.B uname
+Print system information. Implements POSIX-standard flags querying kernel system info directly via utsname.
+.TP
+.B yes
+Output a string repeatedly until killed. Optimized with a 64KB chunked memory buffer for extreme I/O throughput.
+
+.SH LICENSING
+.B paxutils
+is licensed under the MIT No Attribution License
+
+.SH AUTHOR
+Written by Rafael Peixoto.
